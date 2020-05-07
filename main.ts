@@ -1,8 +1,10 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, Tray, Menu, NativeImage } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 
 let win: BrowserWindow = null;
+let tray: Tray = null;
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -21,6 +23,24 @@ function createWindow(): BrowserWindow {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve) ? true : false,
     },
+  });
+
+  // tray = new Tray(path.join(__dirname, 'tray.png'));
+  tray = new Tray(path.join(__dirname, 'tray.png'));
+
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Open', click:  function(){
+        win.show();
+      } },
+    { label: 'Quit', click:  function(){
+        win.destroy();
+        app.quit();
+      } }
+  ]));
+
+  win.on('close', function (event) {
+    event.preventDefault();
+    win.hide();
   });
 
   if (serve) {
